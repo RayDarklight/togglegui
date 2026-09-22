@@ -1,0 +1,64 @@
+#!/bin/bash
+# togglegui — switch between GUI and headless mode
+# Usage: togglegui [on|off]
+
+STATE_FILE="/tmp/.gui_state"
+BACKLIGHT="/sys/class/backlight/intel_backlight"
+BRIGHTNESS_SAVE="/tmp/.backlight_brightness"
+LOG_FILE="/var/log/togglegui.log"
+
+log() {
+    echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" | sudo tee -a "$LOG_FILE" > /dev/null
+    echo "$1"
+}
+
+gui_on() {
+    log "→ Starting GUI..."
+
+    sudo systemctl start display-manager
+    log "✓ Display manager started."
+
+    sudo systemctl restart docker 2>/dev/null
+    log "✓ Docker kept running."
+
+    echo "GUI" > "$STATE_FILE"
+    log "→ Turning on all displays..."
+
+    saved=$(cat "$BRIGHTNESS_SAVE" 2>/dev/null || cat "$BACKLIGHT/max_brightness")
+    echo "$saved" | sudo tee "$BACKLIGHT/brightness" > /dev/null
+    log "✓ Laptop display on."
+
+    log "✓ GUI started."
+}
+
+gui_off() {
+    log "→ Stopping GUI..."
+
+    cat "$BACKLIGHT/brightness" > "$BRIGHTNESS_SAVE"
+    echo 0 | sudo tee "$BACKLIGHT/brightness" > /dev/null
+    log "✓ Laptop display off."
+
+    sudo systemctl stop display-manager
+    log "✓ Display manager stopped."
+
+    sudo systemctl restart docker 2>/dev/null
+    log "✓ Docker kept running."
+
+    echo "HEADLESS" > "$STATE_FILE"
+    log "✓ Headless on."
+}
+
+if [[ "$1" == "on" ]]; then
+    gui_on; exit 0
+elif [[ "$1" == "off" ]]; then
+    gui_off; exit 0
+elif [[ "$1" == "status" ]]; then
+    cat "$STATE_FILE" 2>/dev/null || echo "Unknown"
+    exit 0
+fi
+
+if systemctl is-active --quiet display-manager; then
+    gui_off
+else
+    gui_on
+fi

@@ -1,0 +1,6 @@
+# State and temp files (these live in /tmp at runtime)
+.gui_state
+.backlight_brightness
+
+# Logs
+*.log

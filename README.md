@@ -112,6 +112,22 @@ All actions are logged with timestamps to:
 
 ---
 
+## Known Issues
+
+### External display shows TTY after GUI off
+
+When switching to headless mode, an externally connected display (HDMI/DisplayPort) may remain active and show a raw TTY console instead of going blank. This happens because the script only controls the internal Intel backlight — external displays are managed separately by the display server, and when the display manager is stopped the system falls back to TTY output on whatever screens are still physically connected.
+
+**Workaround:** Unplug the external display before running `togglegui off`, or manually blank it via:
+```bash
+xrandr --output <display-name> --off
+```
+Run `xrandr` to find your external display name (e.g. `HDMI-1`, `DP-1`) before switching off.
+
+A proper fix would involve detecting and disabling external outputs as part of the `gui_off` flow — planned for a future revision.
+
+---
+
 ## Revision History
 
 | Version | Notes |

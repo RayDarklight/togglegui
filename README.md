@@ -6,6 +6,16 @@ When switched to headless mode, the display manager is stopped and the screen ba
 
 ---
 
+## ⚠️ Warning & Prerequisites 
+
+**Critical Requirement:** You **MUST** establish an active SSH connection prior to initiating this code.
+
+**Known Issue:** This code currently has a major flaw where if it is initiated locally without a pre-existing SSH connection, you will lose your display and the GUI/service cannot be turned back on. If you trigger this issue, the only way to recover is to perform a full system restart. 
+
+Please ensure your SSH session is active before proceeding to avoid losing access.
+
+---
+
 ## Features
 
 - Toggle GUI on/off with a single command
@@ -24,6 +34,7 @@ When switched to headless mode, the display manager is stopped and the screen ba
 | `systemd` | Used to manage the display manager and Docker |
 | `ethtool` | Optional — only needed if using alongside WOL setup |
 | `sudo` | Required for display manager and backlight control |
+| `SSH` | **Critical** — Required for remote control. Without it, there is no way to access the system when the GUI is off without forcing a reboot. |
 | Intel backlight | Expects `/sys/class/backlight/intel_backlight` — AMD systems may need to adjust this path |
 | Display manager | Any systemd-managed display manager (SDDM, GDM, LightDM, etc.) |
 | Docker (optional) | If not installed, Docker-related lines fail silently |
